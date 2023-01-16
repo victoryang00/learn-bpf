@@ -4,18 +4,22 @@
 #include <uapi/linux/bpf.h>
 #include "bpf_helpers.h"
 
-SEC("kprobe/memcpy")
-
+SEC("kprobe/__x64_sys_mmap")
 int bpf_prog1(struct pt_regs *ctx)
 {
-	unsigned long long size;
-	char fmt[] = "memcpy size %d\n";
+    long size;
+    long address;
+    char fmt[] = "__x64 size %d %ld %llu\n";
+    u32 pid = bpf_get_current_pid_tgid();
+    if (pid == DESIRED_PID)
+    {
+        bpf_probe_read(&size, sizeof(size), (void *)&PT_REGS_PARM2(ctx));
+        bpf_probe_read(&address, sizeof(address), (void *)&PT_REGS_PARM1(ctx));
 
-	bpf_probe_read(&size, sizeof(size), (void *)&PT_REGS_PARM3(ctx));
+        bpf_trace_printk(fmt, sizeof(fmt), size, address, bpf_ktime_get_ns());
+    }
 
-	bpf_trace_printk(fmt, sizeof(fmt), size);
-
-	return 0;
+    return 0;
 }
 
 char _license[] SEC("license") = "GPL";

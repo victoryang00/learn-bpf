@@ -21,7 +21,7 @@ int main(int argc, char **argv)
 
 	while (1) {
 		printf("\tSize\t\tCount\n");
-		for (size = 0; size <=1024; size = size + 64) {
+		for (size = 0; size <=32; size = size + 1) {
 			if(bpf_map_lookup_elem(map_fd[0], &size, &size_cnt))
 				size_cnt = 0;
 			if (size == 1024)

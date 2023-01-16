@@ -5,3 +5,6 @@ tags
 *.ll
 memcpy_kprobe
 memcpy_stat
+build
+tmpfs*
+.vscode
