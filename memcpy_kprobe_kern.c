@@ -4,20 +4,18 @@
 #include <uapi/linux/bpf.h>
 #include "bpf_helpers.h"
 
-SEC("kprobe/__x64_sys_mmap")
+SEC("kprobe/__x64_sys_munmap")
 int bpf_prog1(struct pt_regs *ctx)
 {
     long size;
     long address;
-    char fmt[] = "__x64 size %d %ld %llu\n";
+    char fmt[] = "munmap %ld %ld %llu\n";
     u32 pid = bpf_get_current_pid_tgid();
-    if (pid == DESIRED_PID)
-    {
-        bpf_probe_read(&size, sizeof(size), (void *)&PT_REGS_PARM2(ctx));
-        bpf_probe_read(&address, sizeof(address), (void *)&PT_REGS_PARM1(ctx));
 
-        bpf_trace_printk(fmt, sizeof(fmt), size, address, bpf_ktime_get_ns());
-    }
+    bpf_probe_read(&size, sizeof(size), (void *)&PT_REGS_PARM2(ctx));
+    bpf_probe_read(&address, sizeof(address), (void *)&PT_REGS_PARM1(ctx));
+
+    bpf_trace_printk(fmt, sizeof(fmt), size, address, bpf_ktime_get_ns());
 
     return 0;
 }

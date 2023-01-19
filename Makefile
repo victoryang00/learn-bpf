@@ -10,7 +10,7 @@ USER_OBJECTS = ${USER_SOURCES:.c=.o}
 # Notice: the kbuilddir can be redefined on make cmdline
 KERNEL ?= /lib/modules/$(shell uname -r)/build/
 
-CFLAGS := -O2 -Wall
+CFLAGS := -O2 -Wall -fpermissive -std=c++2b
 CFLAGS += -I ./
 
 EXTRA_CFLAGS=-Wno-error
@@ -22,7 +22,7 @@ BPFLIB += bpf_load.o
 
 LLC ?= llc
 CLANG ?= clang
-CC = gcc
+CC = g++
 
 NOSTDINC_FLAGS := -nostdinc -isystem $(shell $(CC) -print-file-name=include)
 ARCH=$(shell uname -m | sed 's/x86_64/x86/' | sed 's/i386/x86/')
@@ -62,5 +62,5 @@ $(KERN_OBJECTS): %.o: %.c bpf_helpers.h
 	#now translate LLVM assembly to native assembly
 	$(LLC) -march=bpf -filetype=obj -o $@ ${@:.o=.ll}
 
-$(TARGETS): %: %_user.c $(BPFLIB) Makefile
+$(TARGETS): %: %_user.cpp $(BPFLIB) Makefile
 	$(CC) $(CFLAGS) $(BPFLIB) $(LDFLAGS) -o $@ $<
